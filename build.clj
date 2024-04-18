@@ -19,14 +19,14 @@
          ;; used to pull dep jars
          :basis (b/create-basis {})
          :class-dir class-dir
-         :src-dirs ["src/backend"]
+         :src-dirs ["src"]
          :ns-compile [main]))
 
 (defn uberjar "Publish a new Uberjar" [opts]
   (clean opts)
   (let [opts (uber-opts opts)]
     (println "\nCopying source...")
-    (b/copy-dir {:src-dirs ["resources" "src"] :target-dir class-dir})
+    (b/copy-dir {:src-dirs ["src"] :target-dir class-dir})
     (println (str "\nCompiling " main "..."))
     (b/compile-clj opts)
     (println "\nBuilding JAR..." (:uber-file opts))

@@ -1,5 +1,6 @@
 {:paths ["src"]
- :deps {org.clojure/clojure {:mvn/version "1.11.2"}}
+ :deps {org.clojure/clojure {:mvn/version "1.11.2"}
+        com.github.clj-easy/graal-build-time {:mvn/version "1.0.5"}}
  :aliases
  {:run-m {:main-opts ["-m" "com.something.app"]}
   :run-x {:ns-default com.something.app

@@ -30,3 +30,8 @@
 /target
 reports
 *.build_artifacts.txt
+# native-image output
+/example
+*.exe
+/hello-native
+/hello-native.exe

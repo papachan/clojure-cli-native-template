@@ -8,5 +8,4 @@
   (println (str (:name data) "!")))
 
 (defn -main [& args]
-  (println "something")
-  (System/exit 0))
+  (func-call {:name (or (first args) "Clojure")}))

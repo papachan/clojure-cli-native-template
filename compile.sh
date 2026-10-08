@@ -1,25 +1,36 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+# Build a GraalVM native image from the uberjar (run `clojure -T:build uberjar` first).
+# Usage: ./compile.sh [binary-name]
+set -euo pipefail
 
-SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-JAR_PATH="target/com.something-0.1.0-SNAPSHOT.jar"
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
-if [ $# -eq 1 ]; then
-    BINARY_NAME=$1
+JAR_PATH="target/app.jar"
+BINARY_NAME="${1:-example}"
+
+if [ -n "${GRAALVM_HOME:-}" ]; then
+    NATIVE_IMAGE="${GRAALVM_HOME}/bin/native-image"
+    # on Windows the launcher is native-image.cmd
+    [ -e "$NATIVE_IMAGE" ] || NATIVE_IMAGE="${NATIVE_IMAGE}.cmd"
+elif command -v native-image >/dev/null 2>&1; then
+    NATIVE_IMAGE="native-image"
 else
-    BINARY_NAME="example"
+    echo "native-image not found: set GRAALVM_HOME or add it to PATH" >&2
+    exit 1
 fi
 
-${GRAALVM_HOME}/bin/native-image -jar ${JAR_PATH} \
-                                 --no-fallback \
-                                 --install-exit-handlers \
-                                 -J-Dclojure.spec.skip-macros=true \
-                                 -J-Dclojure.compiler.direct-linking=true \
-                                 -H:ReflectionConfigurationFiles=reflection.json \
-                                 -H:Name="${BINARY_NAME}" \
-                                 --features=clj_easy.graal_build_time.InitClojureClasses
-
-if [ -f "$BINARY_NAME" ]; then
-echo ""
-echo "Done! The native image have been compiled:"
-echo "Size of generated native-image `ls -sh ${BINARY_NAME}`"
+if [ ! -f "$JAR_PATH" ]; then
+    echo "$JAR_PATH not found: run 'clojure -T:build uberjar' first" >&2
+    exit 1
 fi
+
+# build flags live in resources/META-INF/native-image/com.something/app/native-image.properties
+"$NATIVE_IMAGE" -jar "$JAR_PATH" -o "$BINARY_NAME"
+
+# native-image appends .exe on Windows
+for f in "$BINARY_NAME" "$BINARY_NAME.exe"; do
+    if [ -f "$f" ]; then
+        echo ""
+        echo "Done! Native image compiled: $(ls -sh "$f")"
+    fi
+done

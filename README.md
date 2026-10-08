@@ -25,8 +25,14 @@ pacman -Syy gcc
 
 ```
 clojure -T:build uberjar
-./compile.sh hello-native
 ```
+
+Call makefile:
+
+```
+BINARY=hello make
+```
+
 
 ### Run
 
